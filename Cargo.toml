@@ -4,7 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-json = "0.12.4"
-softbuffer = "0.4.6"
-tiny-skia = "0.11.4"
-winit = "0.30.12"
+clay-layout = { version = "0.4.0", features = ["raylib-renderer"] }
+raylib = { version = "5.5.1", features = ["wayland"] }

@@ -23,27 +23,27 @@
         pkgs.pkg-config
         pkgs.gcc13
       ];
-      buildInputs = [
-        pkgs.samply
-        pkgs.wayland
-        pkgs.vulkan-loader
-        pkgs.vulkan-tools
-        pkgs.wayland
-        pkgs.wayland-protocols
-        pkgs.libXcursor
-        pkgs.libXrandr
-        pkgs.libXi
-        pkgs.vulkan-loader
-        pkgs.libxkbcommon
+      buildInputs = with pkgs; [
+        libXcursor
+        libXrandr
+        libXi
+        libxkbcommon
         rust
-        pkgs.SDL2
-        pkgs.rust-analyzer
-        pkgs.clippy
+        rust-analyzer
+        clippy
+
+        #for raylib
+        glfw
+        wayland
+        libxkbcommon
+        wayland-protocols
+        extra-cmake-modules
+        libclang
       ];
 
       shellHook = ''
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath buildInputs}
-        exec zsh -c "nvim"
+        exec zsh
       '';
     };
   };

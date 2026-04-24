@@ -16,50 +16,53 @@ fn main() {
         .title("Clay Layout with Raylib")
         .build();
 
-    while !rl.window_should_close() {
-        clay.set_layout_dimensions(
-            (rl.get_screen_width() as f32, rl.get_screen_height() as f32).into(),
-        );
+    let mut frame_count = 0;
 
-        let mut d = rl.begin_drawing(&thread);
-        d.clear_background(Color::WHITE);
+    while !rl.window_should_close() {
+        let begin = std::time::Instant::now();
+        let width = rl.get_screen_width() as f32;
+        let height = rl.get_screen_height() as f32;
+        clay.set_layout_dimensions((width, height).into());
 
         let mut clay = clay.begin::<_, _>();
 
-        #[rustfmt::skip]
-        clay.with(
-            Declaration::new()
-                .layout()
-                    .width(grow!())
-                    .height(grow!())
-                .end(),
-            |c| {
-                c.with(
-                    &monitor_area::draw_monitor_area(1.0, (0., 0.)),
-                    |c| {
-                        let (area_1, area_2) = ui::section_main_area();
-                        c.with(&area_1, |_| {});
-                        c.with(&area_2, |_| {});
-                    }
-                );
+        let min_split = 0.0;
+        let max_split = {
+            let size = height;
+            let divider_size = ui::DIVIDER_SIZE;
+            1.0 - (divider_size / size)
+        };
 
-                c.with(
-                    Declaration::new()
-                        .layout()
-                            .width(grow!())
-                            .height(grow!())
-                        .end()
-                        .corner_radius()
-                            .all(24.)
-                        .end()
-                        .background_color((0x00, 0x00, 0x00).into()),
-                    |_| {}
-                );
+        let non_adjusted_split = f32::sin(frame_count as f32 * 0.01) * 0.5 + 0.5;
+        let layout_settings_split = min_split + (max_split - min_split) * non_adjusted_split;
+
+        ui::draw_ui(
+            &mut clay,
+            &ui::DrawUiInfo {
+                layout_settings_split,
             },
         );
 
         let render_commands = clay.end();
 
-        clay_raylib_render(&mut d, render_commands, |_, _| {});
+        let mut d = rl.begin_drawing(&thread);
+        d.clear_background(Color::WHITE);
+
+        if frame_count == 0 {
+            for command in render_commands {
+                println!("{:?}", command);
+            }
+        } else {
+            clay_raylib_render(&mut d, render_commands, |_, _| {});
+        }
+
+        frame_count += 1;
+
+        //limit to 60 fps
+        let elapsed = begin.elapsed();
+        let target_frame_time = std::time::Duration::from_secs_f32(1.0 / 144.0);
+        if elapsed < target_frame_time {
+            std::thread::sleep(target_frame_time - elapsed);
+        }
     }
 }

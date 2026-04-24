@@ -1,5 +1,11 @@
-use clay_layout::{Clay, Declaration, fixed, grow, renderers::clay_raylib_render};
+use clay_layout::{
+    Clay, Declaration, fixed, grow, layout::LayoutDirection, renderers::clay_raylib_render,
+};
 use raylib::prelude::*;
+
+use crate::ui::monitor_area;
+
+mod ui;
 
 fn main() {
     let mut clay = Clay::new((800.0, 600.0).into());
@@ -18,7 +24,7 @@ fn main() {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::WHITE);
 
-        let mut clay = clay.begin::<_, ()>();
+        let mut clay = clay.begin::<_, _>();
 
         #[rustfmt::skip]
         clay.with(
@@ -29,16 +35,12 @@ fn main() {
                 .end(),
             |c| {
                 c.with(
-                    Declaration::new()
-                        .layout()
-                            .width(grow!())
-                            .height(grow!())
-                        .end()
-                        .corner_radius()
-                            .all(24.)
-                        .end()
-                        .background_color((0xFF, 0x00, 0x00).into()),
-                    |_| {}
+                    &monitor_area::draw_monitor_area(1.0, (0., 0.)),
+                    |c| {
+                        let (area_1, area_2) = ui::section_main_area();
+                        c.with(&area_1, |_| {});
+                        c.with(&area_2, |_| {});
+                    }
                 );
 
                 c.with(
@@ -50,7 +52,7 @@ fn main() {
                         .corner_radius()
                             .all(24.)
                         .end()
-                        .background_color((0x00, 0xFF, 0x00).into()),
+                        .background_color((0x00, 0x00, 0x00).into()),
                     |_| {}
                 );
             },

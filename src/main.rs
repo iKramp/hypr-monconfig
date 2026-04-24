@@ -47,14 +47,8 @@ fn main() {
 
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::WHITE);
-
-        if frame_count == 0 {
-            for command in render_commands {
-                println!("{:?}", command);
-            }
-        } else {
-            clay_raylib_render(&mut d, render_commands, |_, _| {});
-        }
+        clay_raylib_render(&mut d, render_commands, |_, _| {});
+        drop(d);
 
         frame_count += 1;
 

@@ -1,9 +1,7 @@
 use clay_layout::{
-    ClayLayoutScope, Declaration,
-    elements::FloatingAttachPointType,
-    fixed, grow,
-    layout::{LayoutDirection, Sizing},
-    percent,
+    Clay_GetScrollOffset, ClayLayoutScope, Declaration, fixed, grow,
+    id::Id,
+    layout::{Alignment, LayoutAlignmentX, LayoutAlignmentY, LayoutDirection, Sizing},
 };
 use raylib::texture::Texture2D;
 
@@ -26,10 +24,9 @@ where
             .height(grow!())
             .direction(LayoutDirection::TopToBottom)
         .end(), |c| {
-            let (monitor_part, settings_part) = section_main_area::<'b>(info.layout_settings_split);
-            c.with(&monitor_part, |c| {
+            let (mut monitor_part, mut settings_part) = section_main_area::<'b>(info.layout_settings_split);
+            c.with(monitor_part.id(c.id("monitor_layout_area")), |c| {
                 c.with(&monitor_area::draw_monitor_area(1.0, (0., 0.)), |_c| {
-                    // Draw monitor area content here
                 });
             });
             c.with(
@@ -43,7 +40,7 @@ where
                     // Draw divider here (optional)
                 },
             );
-            c.with(&settings_part, |_c| {
+            c.with(settings_part.id(c.id("monitor_settings_area")), |_c| {
                 // Draw settings area content here
             });
         });
@@ -58,7 +55,9 @@ pub fn section_main_area<'a>(percentage: f32) -> (Declaration<'a, Texture2D, ()>
         .layout()
             .width(grow!())
             .height(Sizing::Percent(percentage))
+            .child_alignment(Alignment::new(LayoutAlignmentX::Center, LayoutAlignmentY::Center))
         .end()
+        .clip(true, true, unsafe { Clay_GetScrollOffset().into() })
         .corner_radius()
             .all(24.)
         .end()

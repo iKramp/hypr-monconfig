@@ -1,14 +1,13 @@
-use clay_layout::{ClayLayoutScope, Declaration, grow, layout::LayoutDirection};
+use clay_layout::{Declaration, fixed};
 use raylib::texture::Texture2D;
 
 #[rustfmt::skip]
-pub fn draw_monitor_area<'a>(scale: f32, position: (f32, f32)) -> Declaration<'a, Texture2D, ()> {
+pub fn draw_monitor_area<'a>(_scale: f32, _position: (f32, f32)) -> Declaration<'a, Texture2D, ()> {
     let mut declaration = Declaration::new();
     declaration
         .layout()
-            .width(grow!())
-            .height(grow!())
-            .direction(LayoutDirection::TopToBottom)
+            .width(fixed!(100.))
+            .height(fixed!(100.))
         .end()
         .corner_radius()
             .all(24.)

@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 clay-layout = { version = "0.4.0", features = ["raylib-renderer"] }
 raylib = { version = "5.5.1", features = ["wayland"] }
+xdg = "3.0.0"

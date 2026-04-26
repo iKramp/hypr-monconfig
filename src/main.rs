@@ -1,10 +1,9 @@
-use clay_layout::{
-    Clay, Declaration, fixed, grow, layout::LayoutDirection, renderers::clay_raylib_render,
-};
+use clay_layout::{Clay, renderers::clay_raylib_render};
 use raylib::prelude::*;
 
-use crate::ui::monitor_area;
+use crate::ui::drag_divider;
 
+mod config;
 mod ui;
 
 fn main() {
@@ -16,32 +15,25 @@ fn main() {
         .title("Clay Layout with Raylib")
         .build();
 
-    let mut frame_count = 0;
+    let mut draw_info = ui::DrawUiInfo {
+        layout_settings_split: 0.5,
+        size_px: (800.0, 600.0),
+        dragging_divider: false,
+        monitor_location_data: config::hyprctl::parse_hyprctl(),
+    };
 
     while !rl.window_should_close() {
         let begin = std::time::Instant::now();
         let width = rl.get_screen_width() as f32;
         let height = rl.get_screen_height() as f32;
+        draw_info.size_px = (width, height);
         clay.set_layout_dimensions((width, height).into());
 
         let mut clay = clay.begin::<_, _>();
 
-        let min_split = 0.0;
-        let max_split = {
-            let size = height;
-            let divider_size = ui::DIVIDER_SIZE;
-            1.0 - (divider_size / size)
-        };
+        ui::draw_ui(&mut clay, &draw_info);
 
-        let non_adjusted_split = f32::sin(frame_count as f32 * 0.01) * 0.5 + 0.5;
-        let layout_settings_split = min_split + (max_split - min_split) * non_adjusted_split;
-
-        ui::draw_ui(
-            &mut clay,
-            &ui::DrawUiInfo {
-                layout_settings_split,
-            },
-        );
+        drag_divider(&mut rl, &mut clay, &mut draw_info);
 
         let render_commands = clay.end();
 
@@ -49,8 +41,6 @@ fn main() {
         d.clear_background(Color::WHITE);
         clay_raylib_render(&mut d, render_commands, |_, _| {});
         drop(d);
-
-        frame_count += 1;
 
         //limit to 60 fps
         let elapsed = begin.elapsed();
